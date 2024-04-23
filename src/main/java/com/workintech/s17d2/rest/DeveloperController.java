@@ -6,17 +6,18 @@ import com.workintech.s17d2.tax.Taxable;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 @RestController
 public class DeveloperController {
     public Map<Integer, Developer> developers;
     private Taxable taxable;
+
+
 
     @PostConstruct
     public void init(){
@@ -29,7 +30,7 @@ public class DeveloperController {
 
 
     @Autowired
-    public DeveloperController(@Qualifier("developerTax") Taxable taxable) {
+    public DeveloperController(Taxable taxable) {
         this.taxable = taxable;
     }
 
@@ -45,9 +46,20 @@ public class DeveloperController {
         return developers.get(id);
     }
 
+
     @PostMapping("/developers")
+    @ResponseStatus(HttpStatus.CREATED)
     public Developer save(@RequestBody Developer developer){
-        developers.put(developer.getId(),developer);
+        if(developer.getExperience().equals(Experience.JUNIOR)){
+            double salary=developer.getSalary()-taxable.getSimpleTaxRate();
+            developers.put(developer.getId(),new Developer(developer.getId(),developer.getName(),salary,Experience.JUNIOR));
+        } else if (developer.getExperience().equals(Experience.MID)) {
+            double salary=developer.getSalary()-taxable.getMiddleTaxRate();
+            developers.put(developer.getId(),new Developer(developer.getId(),developer.getName(),salary,Experience.MID));
+        }else if (developer.getExperience().equals(Experience.SENIOR)) {
+            double salary = developer.getSalary() - taxable.getMiddleTaxRate();
+            developers.put(developer.getId(), new Developer(developer.getId(), developer.getName(), salary, Experience.SENIOR));
+        }
         return developer;
     }
 
