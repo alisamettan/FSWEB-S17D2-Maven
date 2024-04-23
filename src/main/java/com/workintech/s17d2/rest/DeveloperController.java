@@ -1,7 +1,6 @@
 package com.workintech.s17d2.rest;
 
-import com.workintech.s17d2.model.Developer;
-import com.workintech.s17d2.model.Experience;
+import com.workintech.s17d2.model.*;
 import com.workintech.s17d2.tax.Taxable;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +50,14 @@ public class DeveloperController {
     @ResponseStatus(HttpStatus.CREATED)
     public Developer save(@RequestBody Developer developer){
         if(developer.getExperience().equals(Experience.JUNIOR)){
-            double salary=developer.getSalary()-taxable.getSimpleTaxRate();
-            developers.put(developer.getId(),new Developer(developer.getId(),developer.getName(),salary,Experience.JUNIOR));
+            double salary=developer.getSalary()-(developer.getSalary()* taxable.getSimpleTaxRate()/100);
+            developers.put(developer.getId(),new JuniorDeveloper(developer.getId(),developer.getName(),salary));
         } else if (developer.getExperience().equals(Experience.MID)) {
-            double salary=developer.getSalary()-taxable.getMiddleTaxRate();
-            developers.put(developer.getId(),new Developer(developer.getId(),developer.getName(),salary,Experience.MID));
+            double salary=developer.getSalary()-(developer.getSalary()* taxable.getMiddleTaxRate()/100);
+            developers.put(developer.getId(),new MidDeveloper(developer.getId(),developer.getName(),salary));
         }else if (developer.getExperience().equals(Experience.SENIOR)) {
-            double salary = developer.getSalary() - taxable.getMiddleTaxRate();
-            developers.put(developer.getId(), new Developer(developer.getId(), developer.getName(), salary, Experience.SENIOR));
+            double salary = developer.getSalary() - (developer.getSalary()* taxable.getUpperTaxRate()/100);
+            developers.put(developer.getId(), new SeniorDeveloper(developer.getId(), developer.getName(), salary));
         }
         return developer;
     }
